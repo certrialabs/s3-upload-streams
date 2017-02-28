@@ -1,0 +1,30 @@
+{
+  "name": "s3-upload-streams",
+  "version": "1.0.0",
+  "description": "A promise besed paralel tool for uploading nodejs streams to s3.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/elsix/s3-upload-streams.git"
+  },
+  "keywords": [
+    "S3",
+    "upload",
+    "promise",
+    "stream"
+  ],
+  "author": "Kiril Kalchev",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/elsix/s3-upload-streams/issues"
+  },
+  "homepage": "https://github.com/elsix/s3-upload-streams#readme",
+  "dependencies": {
+    "events": "^1.1.1",
+    "lodash": "^4.17.4",
+    "uuid": "^3.0.1"
+  }
+}
