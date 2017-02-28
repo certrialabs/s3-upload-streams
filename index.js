@@ -42,17 +42,27 @@ class Uploader extends EventEmitter {
     }
 
     if (partialUploadParams &&
-      (!partialUploadParams.hasOwnProperty('Offset') || !partialUploadParams.hasOwnProperty('UploadId'))) {
-        return new Promise((resolve, reject) => reject('Please provide Offset and UploadId for partial upload'));
+      (!partialUploadParams.hasOwnProperty('UploadId'))) {
+        return new Promise((resolve, reject) => reject('Please provide UploadId for partial upload'));
+    }
+
+    let parts = [];
+    let offset = 0;
+    if (partialUploadParams && partialUploadParams.Parts) {
+      parts = _.map(partialUploadParams.Parts, part => new Promise(resolve => resolve(part)));
+    }
+
+    if (partialUploadParams && partialUploadParams.Offset) {
+      offset = partialUploadParams.Offset;
     }
 
     this.uploadInternalStorage[id] = {
-      partPromises:[],
+      partPromises: parts,
       createUploadPromise: null,
       amazonKey: s3Params.Key,
       readable: readable,
       additionalMetadata: additionalMetadata,
-      partOffset: partialUploadParams ?  partialUploadParams.Offset : 0
+      partOffset: offset
     };
 
     this.uploadInternalStorage[id].readable.on('readable', () => {
@@ -62,7 +72,7 @@ class Uploader extends EventEmitter {
 
     // craeteMultipartUpload only if we are responsible to corrdinate all paralel uploads
     if (partialUploadParams) {
-        this.uploadInternalStorage[id].createUploadPromise = new Promise((resolve) => resolve(partialUpload.UploadId));
+        this.uploadInternalStorage[id].createUploadPromise = new Promise((resolve) => resolve(partialUploadParams.UploadId));
     } else {
       this.uploadInternalStorage[id].createUploadPromise = this.s3.createMultipartUpload(_.merge({
           Bucket: this.bucket
@@ -72,6 +82,14 @@ class Uploader extends EventEmitter {
     }
 
     return new Promise(resolve => resolve(id));
+  }
+
+  awsUploadId(id) {
+    return this.uploadInternalStorage[id].createUploadPromise;
+  }
+
+  awsParts(id) {
+    return Promise.all(this.uploadInternalStorage[id].partPromises);
   }
 
   completeUpload(uploadId) {
@@ -189,4 +207,3 @@ class Uploader extends EventEmitter {
 };
 
 module.exports = Uploader;
-
