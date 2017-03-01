@@ -100,7 +100,7 @@ class Uploader extends EventEmitter {
     .then((requests) => {
       let key = this.uploadInternalStorage[uploadId].amazonKey;
       let amazonUploadId = requests[0];
-      let parts = requests.slice(1, requests.length);
+      let parts = _.sortBy(requests.slice(1, requests.length), ['PartNumber']);
       return this.s3.completeMultipartUpload({
         Bucket: this.bucket,
         Key: key,
