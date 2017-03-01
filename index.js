@@ -65,10 +65,11 @@ class Uploader extends EventEmitter {
       partOffset: offset
     };
 
-    this.uploadInternalStorage[id].readable.on('readable', () => {
-      this.emit('_newDataAvailable', id);
-    });
-
+    if (this.uploadInternalStorage[id].readable) {
+      this.uploadInternalStorage[id].readable.on('readable', () => {
+        this.emit('_newDataAvailable', id);
+      });
+    }
 
     // craeteMultipartUpload only if we are responsible to corrdinate all paralel uploads
     if (partialUploadParams) {
