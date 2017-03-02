@@ -34,9 +34,10 @@ I will publish a package with proper version to npm soon.
     .catch(err => console.log(err));
   });
 ```
-## constructor(s3Params, readable, additionalMetadata, partialUploadParams)
+
+## constructor(s3, bucket, partSize, concurency)
 TODO
-## s3Uploader.startUpload()
+## s3Uploader.startUpload(s3Params, readable, additionalMetadata, partialUploadParams)
 TODO
 ## s3Uploader.completeUpload(id)
 TODO
