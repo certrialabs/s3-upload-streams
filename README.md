@@ -10,9 +10,7 @@ For maximum flexibility you provide the Readable streams directly to the S3Uploa
 # Installation
 For now you can install this package directly from git hub using:
 
-`npm install --save https://github.com/elsix/s3-upload-streams#c08cad8cc59c3d28dc9a0e44e843b530674dd5e5`
-
-I will publish a package with proper version to npm soon.
+`npm i --save s3-upload-streams`
 
 # Basic Usage
 ```
