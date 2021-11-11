@@ -62,7 +62,8 @@ class Uploader extends EventEmitter {
       amazonKey: s3Params.Key,
       readable: readable,
       additionalMetadata: additionalMetadata,
-      partOffset: offset
+      partOffset: offset,
+      s3Params: s3Params
     };
 
     if (this.uploadInternalStorage[id].readable) {
@@ -101,34 +102,67 @@ class Uploader extends EventEmitter {
       let key = this.uploadInternalStorage[uploadId].amazonKey;
       let amazonUploadId = requests[0];
       let parts = _.sortBy(requests.slice(1, requests.length), ['PartNumber']);
-      return this.s3.completeMultipartUpload({
-        Bucket: this.bucket,
-        Key: key,
-        UploadId: amazonUploadId,
-        MultipartUpload: {
-          Parts: parts
-        }
-      })
-      .promise()
-      .then((response) => {
-        return this.s3.headObject({
-          Bucket: response.Bucket,
-          Key: response.Key
+      if(parts.length > 0) {
+        return this.s3.completeMultipartUpload({
+          Bucket: this.bucket,
+          Key: key,
+          UploadId: amazonUploadId,
+          MultipartUpload: {
+            Parts: parts
+          }
         })
         .promise()
-        .then((metadata) => {
+        .then((response) => {
+          return this.s3.headObject({
+            Bucket: response.Bucket,
+            Key: response.Key
+          })
+          .promise()
+          .then((metadata) => {
+            let res = {
+              location: response.Location,
+              bucket: response.Bucket,
+              key: response.Key,
+              etag: response.Etag,
+              additionalMetadata: this.uploadInternalStorage[uploadId].additionalMetadata,
+              size: metadata.ContentLength
+            };
+            delete this.uploadInternalStorage[uploadId];
+            return res;
+          });
+        });
+      } else {
+        // Handle empty file upload because multipart upload just throws if there is no content.
+        return this.uploadInternalStorage[uploadId].createUploadPromise
+        .then((amazonUploadId) => {
+          let key = this.uploadInternalStorage[uploadId].amazonKey;
+          return this.s3.abortMultipartUpload({
+            Bucket: this.bucket,
+            Key: key,
+            UploadId: amazonUploadId
+          })
+          .promise();
+        })
+        .then(() => {
+          return this.s3.upload(_.merge({
+            Bucket: this.bucket,
+            Body: ''
+          }, this.uploadInternalStorage[uploadId].s3Params))
+          .promise()
+        })
+        .then((response) => {
           let res = {
             location: response.Location,
             bucket: response.Bucket,
             key: response.Key,
             etag: response.Etag,
             additionalMetadata: this.uploadInternalStorage[uploadId].additionalMetadata,
-            size: metadata.ContentLength
+            size: 0
           };
           delete this.uploadInternalStorage[uploadId];
           return res;
         });
-      });
+      }
     });
   }
 
@@ -143,10 +177,7 @@ class Uploader extends EventEmitter {
       return this.s3.abortMultipartUpload({
         Bucket: this.bucket,
         Key: key,
-        UploadId: amazonUploadId,
-        MultipartUpload: {
-          Parts: parts
-        }
+        UploadId: amazonUploadId
       })
       .promise()
       .then((response) => {
