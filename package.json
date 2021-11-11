@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elsix/s3-upload-streams.git"
+    "url": "git+https://github.com/certrialabs/s3-upload-streams.git"
   },
   "keywords": [
     "S3",
