@@ -1,6 +1,6 @@
 {
   "name": "s3-upload-streams",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A promise besed paralel tool for uploading nodejs streams to s3.",
   "main": "index.js",
   "scripts": {
@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/elsix/s3-upload-streams.git"
+    "url": "git+https://github.com/certrialabs/s3-upload-streams.git"
   },
   "keywords": [
     "S3",
